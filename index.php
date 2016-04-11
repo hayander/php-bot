@@ -16,6 +16,7 @@
             $config = include_once( __DIR__ . '/config.php' );
         }
 
+        $bot = new Library\IRC\Core;
     } catch (Exception $e) {
         echo( 'FATAL ERROR: ' . $e->getMessage() . PHP_EOL );
     }
