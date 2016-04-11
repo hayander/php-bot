@@ -17,6 +17,7 @@
         }
 
         $bot = new Library\IRC\Core;
+        $bot->connect();
     } catch (Exception $e) {
         echo( 'FATAL ERROR: ' . $e->getMessage() . PHP_EOL );
     }

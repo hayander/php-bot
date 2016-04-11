@@ -11,16 +11,27 @@
     class Core
     {
 
-        private $connection;
+        private $server;
 
         public function __construct()
         {
-            $this->connection = new \library\irc\connection;
+            $this->server = new \Library\IRC\Server;
+            $this->server->setServer('irc.hayander.com');
         }
 
         public function connect()
         {
-            $this->connection->connect();
+            $this->server->connect();
+
+            $this->mainLoop();
+        }
+
+        private function mainLoop()
+        {
+            do {
+                $data = $this->server->getIRCData();
+                echo '<< ' . $data . PHP_EOL;
+            } while(true);
         }
 
     }

@@ -6,7 +6,7 @@
      * Time: 9:26 PM
      */
 
-    namespace Library\IRC;
+    namespace Library\Socket;
 
     class Connection
     {
@@ -42,6 +42,16 @@
                 return true;
             }
             return false;
+        }
+
+        public function sendData($data) {
+            fputs($this->socket, $data . "\r\n");
+        }
+
+        public function getData() {
+            if ( !feof($this->socket) ) {
+                return fgets($this->socket);
+            }
         }
 
         public function setServer($server)
