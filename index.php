@@ -8,7 +8,7 @@
 
     try {
 
-        require 'src/loader.php';
+        require 'src/Loader.php';
 
         spl_autoload_register( 'Loader::load' );
 
