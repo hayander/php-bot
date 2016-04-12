@@ -1,9 +1,9 @@
 <?php
     /**
-     * Created by PhpStorm.
-     * User: hayander
-     * Date: 11/04/16
-     * Time: 11:05 PM
+     * @package   PHP Bot
+     * @author    hayander
+     * @file      Config.php
+     * @created   2016-04-11 23:05
      */
 
     return array(
