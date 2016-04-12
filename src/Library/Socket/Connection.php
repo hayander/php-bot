@@ -50,7 +50,10 @@
 
         public function getData() {
             if ( !feof($this->socket) ) {
-                return fgets($this->socket);
+                if ( $data = fgets($this->socket) ) {
+                    return $data;
+                }
+                return false;
             }
         }
 

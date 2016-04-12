@@ -23,18 +23,18 @@
         public function connect()
         {
             if ( $this->connection->connect() ) {
-                $this->sendRawCommand('USER ' . $this->nickname . ' * * :' . $this->gecos);
-                $this->sendRawCommand('NICK ' . $this->nickname);
+                $this->sendData('USER ' . $this->nickname . ' * * :' . $this->gecos);
+                $this->sendData('NICK ' . $this->nickname);
             }
         }
 
-        public function sendRawCommand($data)
+        public function sendData($data)
         {
             echo '>> ' . $data . PHP_EOL;
             $this->connection->sendData($data);
         }
 
-        public function getIRCData()
+        public function getData()
         {
             return $this->connection->getData();
         }
