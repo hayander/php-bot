@@ -29,6 +29,9 @@
             $file = __DIR__ . '/' . str_replace('\\', '/', $class) . '.php';
             if (file_exists($file)) {
                 echo 'Loading Class: ' . $class . PHP_EOL;
+
+                // Prevent IDE warning
+                /** @noinspection PhpIncludeInspection */
                 return require $file;
             }
             throw new \Exception('Unable to load class ' . $class);

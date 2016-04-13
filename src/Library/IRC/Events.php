@@ -23,6 +23,7 @@
 
         /**
          * Construct event class
+         *
          * @param $bot
          */
         public function __construct(Bot $bot)
@@ -31,22 +32,37 @@
         }
 
         /**
+         * On Connect event
+         */
+        public function onConnect()
+        {
+            $this->bot->sendModuleEvents(__FUNCTION__, array());
+        }
+
+        /**
          * On Ping event
+         *
          * @param $arguments
          */
         public function onPing($arguments)
         {
             // Keeps us connected to the server
             $this->sendData('PONG ' . $arguments);
+
+            $methodDetails = array(
+                'arguments' => $arguments,
+            );
+
+            $this->bot->sendModuleEvents(__METHOD__, $methodDetails);
         }
 
         /**
          * Send data to the server
+         *
          * @param $data
          */
         private function sendData($data)
         {
             $this->bot->sendData($data);
         }
-
     }

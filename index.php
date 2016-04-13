@@ -19,7 +19,7 @@
             // Load config, create bot and connect
             $config = include_once(__DIR__ . '/Config/Config.php');
             $bot = new Bot($config);
-            //$bot->connect();
+            $bot->connect();
         }
 
 

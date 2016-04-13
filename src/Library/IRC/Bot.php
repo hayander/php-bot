@@ -28,8 +28,16 @@
          */
         private $event;
 
+        /**
+         * Holds the module controller
+         * @var Modules
+         */
         private $modules;
 
+        /**
+         * Holds the bot config
+         * @var array
+         */
         private $config;
 
         /**
@@ -62,7 +70,7 @@
         private function mainLoop()
         {
             do {
-                $data = $this->server->getData();
+                $data = trim($this->server->getData());
                 if ($data) {
                     echo '<< ' . $data . PHP_EOL;
                     $this->parseIRCData($data);
@@ -79,18 +87,37 @@
         {
             $splitData = explode(' ', $data);
 
-            // Message directly from server
             if (!strpos($splitData[0], '@')) {
-                $commandArgs  = implode(' ', array_splice($splitData, 1));
-                $commandEvent = 'on' . ucfirst(strtolower($splitData[0]));
+                // Message directly from server
+
+                $commandArgs  = array_splice($splitData, 1);
+                $commandEvent = ucfirst(strtolower($splitData[0]));
+
+                // Determine raw numeric received.
+                if (strpos($commandEvent, '.')) {
+                    $commandEvent = 'Raw';
+                    $rawNumeric = $commandArgs[0];
+                    $commandArgs = implode(' ', array_splice($commandArgs, 1));
+
+                    // Create events for known numeric
+                    switch($rawNumeric)
+                    {
+                        case 422:
+                        case 376:
+                            $commandEvent = 'Connect';
+                            $commandArgs = 0;
+                            break;
+                    }
+                }
 
                 // Send the server command to Event Handler
+                $commandEvent = 'on' . $commandEvent;
                 if (method_exists($this->event, $commandEvent)) {
                     $this->event->$commandEvent($commandArgs);
                 }
 
-                // Else, message related to a user
             } else {
+                // Else, message related to a user
 
                 $addressSplit = explode('!', substr($splitData[0], 1));
                 $hostSplit    = explode('@', $addressSplit[1]);
@@ -115,6 +142,13 @@
             $this->server->sendData($data);
         }
 
+        /**
+         * Return the whole config or a particular config item
+         *
+         * @param $item
+         *
+         * @return array
+         */
         public function getConfig($item)
         {
             if (!empty($item)) {
@@ -122,5 +156,16 @@
             } else {
                 return $this->config;
             }
+        }
+
+        /**
+         * Send events through to modules
+         *
+         * @param $event
+         * @param $details
+         */
+        public function sendModuleEvents($event, $details)
+        {
+            $this->modules->sendEvents($event, $details);
         }
     }
