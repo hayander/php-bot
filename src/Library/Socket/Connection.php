@@ -18,7 +18,7 @@
 
         /**
          * Hold the socket resource
-         * @var file pointer
+         * @var resource file pointer
          */
         private $socket;
 

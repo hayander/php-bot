@@ -8,6 +8,8 @@
 
     namespace Library\IRC;
 
+    use Library\Socket\Connection;
+
     /**
      * Deals with the connection of the bot to the IRC server
      * Class Server
@@ -39,7 +41,7 @@
          */
         public function __construct()
         {
-            $this->connection = new \Library\Socket\Connection;
+            $this->connection = new Connection;
         }
 
         /**

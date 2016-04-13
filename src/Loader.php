@@ -22,7 +22,7 @@
          * @param $class
          *
          * @return mixed
-         * @throws Exception
+         * @throws \Exception
          */
         public static function load($class)
         {
@@ -31,6 +31,6 @@
                 echo 'Loading Class: ' . $class . PHP_EOL;
                 return require $file;
             }
-            throw new Exception('Unable to load class ' . $class);
+            throw new \Exception('Unable to load class ' . $class);
         }
     }

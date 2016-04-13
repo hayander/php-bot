@@ -10,10 +10,10 @@
 
     /**
      * The core IRC bot class. The entry point of the bot.
-     * Class Core
+     * Class Bot
      * @package Library\IRC
      */
-    class Core
+    class Bot
     {
 
         /**
@@ -23,12 +23,26 @@
         private $server;
 
         /**
+         * Holds the event listener
+         * @var Events
+         */
+        private $event;
+
+        private $modules;
+
+        private $config;
+
+        /**
          * Constructs the IRC Bot
          */
-        public function __construct()
+        public function __construct($config = array())
         {
-            $this->server = new \Library\IRC\Server;
-            $this->event  = new \Library\IRC\Events($this);
+            if (!empty($config)) {
+                $this->config = $config;
+            }
+            $this->server  = new Server;
+            $this->event   = new Events($this);
+            $this->modules = new Modules($this);
 
             $this->server->setServer('irc.hayander.com');
         }
@@ -58,6 +72,7 @@
 
         /**
          * Delegates actions for data received from the server.
+         *
          * @param $data
          */
         private function parseIRCData($data)
@@ -66,7 +81,7 @@
 
             // Message directly from server
             if (!strpos($splitData[0], '@')) {
-                $commandArgs   = implode(' ', array_splice($splitData, 1));
+                $commandArgs  = implode(' ', array_splice($splitData, 1));
                 $commandEvent = 'on' . ucfirst(strtolower($splitData[0]));
 
                 // Send the server command to Event Handler
@@ -74,7 +89,7 @@
                     $this->event->$commandEvent($commandArgs);
                 }
 
-            // Else, message related to a user
+                // Else, message related to a user
             } else {
 
                 $addressSplit = explode('!', substr($splitData[0], 1));
@@ -92,10 +107,20 @@
 
         /**
          * Send data to the server
+         *
          * @param $data
          */
         public function sendData($data)
         {
             $this->server->sendData($data);
+        }
+
+        public function getConfig($item)
+        {
+            if (!empty($item)) {
+                return $this->config[$item];
+            } else {
+                return $this->config;
+            }
         }
     }

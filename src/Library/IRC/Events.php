@@ -17,7 +17,7 @@
     {
 
         /**
-         * @var \Library\IRC\Core
+         * @var \Library\IRC\Bot
          */
         private $bot;
 
@@ -25,7 +25,7 @@
          * Construct event class
          * @param $bot
          */
-        public function __construct($bot)
+        public function __construct(Bot $bot)
         {
             $this->bot = $bot;
         }

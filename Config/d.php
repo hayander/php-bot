@@ -10,6 +10,9 @@
         'server' => 'irc.hayander.com',
         'port'   => '6697',
         'ssl'    => true,
-        'nick'   => 'HYTEST'
+        'nick'   => 'HYTEST',
+        'modules' => array(
+            'Startup' => array(),
+        ),
     );
 
