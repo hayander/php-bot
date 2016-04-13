@@ -82,6 +82,7 @@
 
         /**
          * Send data through the socket
+         *
          * @param $data
          */
         public function sendData($data)
@@ -107,6 +108,7 @@
 
         /**
          * Set server to connect to
+         *
          * @param $server
          */
         public function setServer($server)
@@ -116,6 +118,7 @@
 
         /**
          * Set port to connect to
+         *
          * @param $port
          */
         public function setPort($port)
@@ -125,6 +128,7 @@
 
         /**
          * Use SSL or not
+         *
          * @param $ssl
          */
         public function setSSL($ssl)

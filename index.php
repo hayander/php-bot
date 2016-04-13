@@ -18,11 +18,9 @@
 
             // Load config, create bot and connect
             $config = include_once(__DIR__ . '/Config/Config.php');
-            $bot = new Bot($config);
+            $bot    = new Bot($config);
             $bot->connect();
         }
-
-
 
     } catch (Exception $e) {
         echo('FATAL ERROR: ' . $e->getMessage() . PHP_EOL);

@@ -7,11 +7,12 @@
      */
 
     return array(
-        'server' => 'irc.hayander.com',
-        'port'   => '6697',
-        'ssl'    => true,
-        'nick'   => 'HYTEST',
-        'modules' => array(
+        'server'         => 'irc.hayander.com',
+        'port'           => '6697',
+        'ssl'            => true,
+        'nick'           => 'HYTEST',
+        'command_prefix' => '!',
+        'modules'        => array(
             'Startup' => array(),
         ),
     );

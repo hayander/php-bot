@@ -38,4 +38,14 @@
             $this->ircJoin('#Bobman');
         }
 
+        /**
+         * Testing command
+         *
+         * @param $methodDetails
+         */
+        public function commandTest($methodDetails)
+        {
+            $this->ircPrivmsg($methodDetails['source'], 'Hello, ' . $methodDetails['address']['nick'] . '! You said: ' . implode(' ', $methodDetails['arguments']));
+        }
+
     }

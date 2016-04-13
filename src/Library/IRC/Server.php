@@ -59,6 +59,7 @@
 
         /**
          * Send data to IRC server
+         *
          * @param $data
          */
         public function sendData($data)
@@ -78,6 +79,7 @@
 
         /**
          * Set the IRC server to connect to
+         *
          * @param $server
          */
         public function setServer($server)

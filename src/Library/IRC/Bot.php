@@ -96,24 +96,17 @@
                 // Determine raw numeric received.
                 if (strpos($commandEvent, '.')) {
                     $commandEvent = 'Raw';
-                    $rawNumeric = $commandArgs[0];
-                    $commandArgs = implode(' ', array_splice($commandArgs, 1));
+                    $rawNumeric   = $commandArgs[0];
+                    $commandArgs  = array_splice($commandArgs, 1);
 
                     // Create events for known numeric
-                    switch($rawNumeric)
-                    {
+                    switch ($rawNumeric) {
                         case 422:
                         case 376:
                             $commandEvent = 'Connect';
-                            $commandArgs = 0;
+                            $commandArgs  = null;
                             break;
                     }
-                }
-
-                // Send the server command to Event Handler
-                $commandEvent = 'on' . $commandEvent;
-                if (method_exists($this->event, $commandEvent)) {
-                    $this->event->$commandEvent($commandArgs);
                 }
 
             } else {
@@ -122,14 +115,28 @@
                 $addressSplit = explode('!', substr($splitData[0], 1));
                 $hostSplit    = explode('@', $addressSplit[1]);
 
-                $user = array(
+                // Split up the address of the user
+                $address = array(
                     'full'  => $addressSplit[0] . $addressSplit[1],
                     'nick'  => $addressSplit[0],
                     'ident' => $hostSplit[0],
                     'host'  => $hostSplit[1]
                 );
-            }
 
+                $command = ucfirst(strtolower($splitData[1]));
+
+                $commandEvent = $command;
+                $commandArgs  = array(
+                    'address'   => $address,
+                    'arguments' => array_splice($splitData, 2),
+                );
+
+            }
+            // Send to the Event Handler
+            $commandEvent = 'on' . $commandEvent;
+            if (method_exists($this->event, $commandEvent)) {
+                $this->event->$commandEvent($commandArgs);
+            }
         }
 
         /**
@@ -152,6 +159,9 @@
         public function getConfig($item)
         {
             if (!empty($item)) {
+                if (empty($this->config[$item])) {
+                    return null;
+                }
                 return $this->config[$item];
             } else {
                 return $this->config;

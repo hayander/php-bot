@@ -27,6 +27,7 @@
 
         /**
          * Construct the base module class
+         *
          * @param Bot $bot
          */
         public function __construct(Bot $bot)
@@ -46,6 +47,17 @@
                 $channel .= ' ' . $key;
             }
             $this->bot->sendData('JOIN :' . $channel);
+        }
+
+        /**
+         * Makes the bot send a message to source using text
+         *
+         * @param $source
+         * @param $text
+         */
+        protected function ircPrivmsg($source, $text)
+        {
+            $this->bot->sendData('PRIVMSG ' . $source . ' :' . $text);
         }
 
         // TODO.
