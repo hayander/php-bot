@@ -23,7 +23,7 @@
          * Hold the core Bot details
          * @var \Library\IRC\Bot
          */
-        private $bot;
+        protected $bot;
 
         /**
          * Construct the base module class
@@ -60,6 +60,16 @@
             $this->bot->sendData('PRIVMSG ' . $source . ' :' . $text);
         }
 
-        // TODO.
+        /**
+         * Makes the bot send a raw message to the server
+         *
+         * @param $text
+         */
+        protected function ircSendRaw($text)
+        {
+            $this->bot->sendData($text);
+        }
+
+        // TODO: Need to add IRC commands (Such as Notice, Describe, Part, Kick, Ban, Mode, Quit)
 
     }

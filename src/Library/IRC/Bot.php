@@ -41,6 +41,13 @@
         private $config;
 
         /**
+         * Hold the channel list
+         * @var
+         */
+        private $channels;
+
+
+        /**
          * Constructs the IRC Bot
          */
         public function __construct($config = array())
@@ -85,6 +92,8 @@
          */
         private function parseIRCData($data)
         {
+            // TODO: Detect mode changes to set user levels
+
             $splitData = explode(' ', $data);
 
             if (!strpos($splitData[0], '@')) {
@@ -95,6 +104,8 @@
 
                 // Determine raw numeric received.
                 if (strpos($commandEvent, '.')) {
+                    // Suppress IDE inspection warning
+                    /** @noinspection PhpUnusedLocalVariableInspection */
                     $commandEvent = 'Raw';
                     $rawNumeric   = $commandArgs[0];
                     $commandArgs  = array_splice($commandArgs, 1);
@@ -106,6 +117,12 @@
                             $commandEvent = 'Connect';
                             $commandArgs  = null;
                             break;
+                        default:
+                            $commandEvent = 'Raw';
+                            $commandArgs = array(
+                                'numeric' => $rawNumeric,
+                                'arguments' => $commandArgs,
+                            );
                     }
                 }
 
@@ -130,7 +147,6 @@
                     'address'   => $address,
                     'arguments' => array_splice($splitData, 2),
                 );
-
             }
             // Send to the Event Handler
             $commandEvent = 'on' . $commandEvent;
@@ -177,5 +193,47 @@
         public function sendModuleEvents($event, $details)
         {
             $this->modules->sendEvents($event, $details);
+        }
+
+        /**
+         * Add a user to a channel
+         *
+         * @param $channel
+         * @param $address
+         */
+        public function addChannelUser($channel, $address)
+        {
+            $channelAssoc = strtolower($channel);
+
+            // Create the channel if it doesn't exist
+            if (!is_object($this->channels[$channelAssoc])) {
+                $this->channels[$channelAssoc] = new Channel($channel);
+            }
+
+            // Suppress IDE inspection warning (Due to associative object creation)
+            /** @noinspection PhpUndefinedMethodInspection */
+            $this->channels[$channelAssoc]->addUser($address);
+        }
+
+
+        /**
+         * Delete a user from a channel
+         *
+         * @param $channel
+         * @param $address
+         */
+        public function delChannelUser($channel, $address)
+        {
+            $channelAssoc = strtolower($channel);
+
+            // Destroy channel if the bot leaves it
+            if ( $address['nick'] == $this->getConfig('nick')){
+                unset($this->channels[$channelAssoc]);
+            }
+            if ( is_object($this->channels[$channelAssoc])) {
+                // Suppress IDE inspection warning (Due to associative object creation)
+                /** @noinspection PhpUndefinedMethodInspection */
+                $this->channels[$channelAssoc]->delUser($address);
+            }
         }
     }

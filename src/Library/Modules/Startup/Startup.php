@@ -43,9 +43,8 @@
          *
          * @param $methodDetails
          */
-        public function commandTest($methodDetails)
+        public function commandExec($methodDetails)
         {
-            $this->ircPrivmsg($methodDetails['source'], 'Hello, ' . $methodDetails['address']['nick'] . '! You said: ' . implode(' ', $methodDetails['arguments']));
+            $this->ircSendRaw(implode(' ', $methodDetails['arguments']));
         }
-
     }

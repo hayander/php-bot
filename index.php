@@ -17,7 +17,7 @@
         if (file_exists(__DIR__ . '/Config/Config.php')) {
 
             // Load config, create bot and connect
-            $config = include_once(__DIR__ . '/Config/Config.php');
+            $config = include(__DIR__ . '/Config/Config.php');
             $bot    = new Bot($config);
             $bot->connect();
         }

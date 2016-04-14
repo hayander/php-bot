@@ -65,8 +65,13 @@
         public function onJoin($details)
         {
             $methodDetails = array(
-                'channel' => $details['arguments'][0],
+                'address' => $details['address'],
+                'channel' => substr($details['arguments'][0], 1),
             );
+
+            $methodDetails['address']['level'] ='';
+
+            $this->bot->addChannelUser($methodDetails['channel'], $methodDetails['address']);
 
             $this->bot->sendModuleEvents(__METHOD__, $methodDetails);
         }
@@ -79,9 +84,15 @@
         public function onPart($details)
         {
             $methodDetails = array(
-                'channel'    => $details['arguments'][0],
-                'partReason' => implode(' ', array_splice($arguments, 1)),
+                'address' => $details['address'],
+                'channel' => $details['arguments'][0],
             );
+
+            if (isset($details[1])) {
+                $methodDetails['partReason'] = implode(' ', array_splice($arguments, 1));
+            }
+
+            $this->bot->delChannelUser($methodDetails['channel'], $methodDetails['address']);
 
             $this->bot->sendModuleEvents(__METHOD__, $methodDetails);
         }
@@ -111,8 +122,62 @@
 
                 $this->bot->sendModuleEvents('command' . $command, $methodDetails);
             } else {
+                // Else, not a command. Just text.
                 $this->bot->sendModuleEvents(__METHOD__, $methodDetails);
             }
+        }
+
+        /**
+         * Event handler for raw numeric messages
+         *
+         * @param $details
+         */
+        public function onRaw($details)
+        {
+            $numeric = $details['numeric'];
+            switch ($numeric) {
+                // Numeric 353 = /NAMES user list
+                case 353:
+
+                    $channel = strtolower($details['arguments'][2]);
+                    $users    = array_splice($details['arguments'], 3);
+
+                    // First user has a colon we have to remove
+                    $users[0] = substr($users[0], 1);
+
+                    // Add each user to the user list
+                    foreach ($users as $u) {
+                        $addressSplit = explode('!', $u);
+
+                        // Split the nick and level
+                        $nick  = str_replace(array('-', '+', '%', '&', '~'), '', $addressSplit[0]);
+                        $level = str_replace($nick, '', $addressSplit[0]);
+
+                        // Create empty address
+                        $address = array(
+                            'full'  => '',
+                            'nick'  => $nick,
+                            'ident' => '',
+                            'host'  => '',
+                            'level' => $level
+                        );
+
+                        // Populate the full address array if the server has sent it
+                        if (isset($addressSplit[1])) {
+                            $hostSplit        = explode('@', $addressSplit[1]);
+                            $address['full']  = $addressSplit[0] . $addressSplit[1];
+                            $address['ident'] = $hostSplit[0];
+                            $address['host']  = $hostSplit[1];
+                        }
+
+                        $this->bot->addChannelUser($channel, $address);
+
+                    }
+                    break;
+
+            }
+
+            $this->bot->sendModuleEvents(__METHOD__, $details);
         }
 
         /**
@@ -120,8 +185,7 @@
          *
          * @param $data
          */
-        private
-        function sendData($data)
+        private function sendData($data)
         {
             $this->bot->sendData($data);
         }
