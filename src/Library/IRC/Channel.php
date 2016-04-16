@@ -32,6 +32,7 @@
 
         /**
          * Construct the channel class
+         *
          * @param $channel
          */
         public function __construct($channel)
@@ -41,19 +42,21 @@
 
         /**
          * Add a user to the user list of the channel
+         *
          * @param $address
          */
         public function addUser($address)
         {
             $nick = strtolower($address['nick']);
 
-            if (!isset($this->users[$nick]) || $this->users[$nick]['full'] == '' ) {
+            if (!isset($this->users[$nick]) || $this->users[$nick]['full'] == '') {
                 $this->users[$nick] = $address;
             }
         }
 
         /**
          * Delete a user from the user list of the channel
+         *
          * @param $address
          */
         public function delUser($address)
@@ -62,6 +65,16 @@
             if (isset($this->users[$nick])) {
                 unset($this->users[$nick]);
             }
+        }
+
+        public function clearUsers()
+        {
+            $this->users = array();
+        }
+
+        public function getUsers()
+        {
+            return $this->users;
         }
 
     }

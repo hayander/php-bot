@@ -36,6 +36,9 @@
          */
         public function onConnect()
         {
+            $this->sendData('PROTOCTL NAMESX');
+            $this->sendData('PROTOCTL UHNAMES');
+
             $this->bot->sendModuleEvents(__FUNCTION__, array());
         }
 
@@ -69,7 +72,7 @@
                 'channel' => substr($details['arguments'][0], 1),
             );
 
-            $methodDetails['address']['level'] ='';
+            $methodDetails['address']['level'] = '';
 
             $this->bot->addChannelUser($methodDetails['channel'], $methodDetails['address']);
 
@@ -128,6 +131,28 @@
         }
 
         /**
+         * Event handler for Mode.
+         *
+         * @param $details
+         */
+        public function onMode($details)
+        {
+            $methodDetails = array(
+                'address'   => $details['address'],
+                'source'    => $details['arguments'][0],
+                'arguments' => explode(' ', trim(substr(implode(' ', array_splice($details['arguments'], 1)), 1))),
+            );
+
+            if (substr($methodDetails['source'], 0, 1) == '#') {
+                // Mode change is in a channel. Reload user levels.
+                $this->bot->clearChannelUsers($methodDetails['source']);
+                $this->sendData('NAMES ' . $methodDetails['source']);
+            }
+
+            $this->bot->sendModuleEvents(__METHOD__, $methodDetails);
+        }
+
+        /**
          * Event handler for raw numeric messages
          *
          * @param $details
@@ -140,7 +165,7 @@
                 case 353:
 
                     $channel = strtolower($details['arguments'][2]);
-                    $users    = array_splice($details['arguments'], 3);
+                    $users   = array_splice($details['arguments'], 3);
 
                     // First user has a colon we have to remove
                     $users[0] = substr($users[0], 1);

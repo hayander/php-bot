@@ -47,4 +47,14 @@
         {
             $this->ircSendRaw(implode(' ', $methodDetails['arguments']));
         }
+
+        /**
+         * !users to list users (Simply outputs the array of users)
+         *
+         * @param $methodDetails
+         */
+        public function commandUsers($methodDetails)
+        {
+            $this->ircPrivmsg($methodDetails['source'], print_r($this->bot->getChannelUsers($methodDetails['source']), true));
+        }
     }

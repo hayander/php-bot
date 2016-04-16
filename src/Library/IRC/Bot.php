@@ -119,8 +119,8 @@
                             break;
                         default:
                             $commandEvent = 'Raw';
-                            $commandArgs = array(
-                                'numeric' => $rawNumeric,
+                            $commandArgs  = array(
+                                'numeric'   => $rawNumeric,
                                 'arguments' => $commandArgs,
                             );
                     }
@@ -227,13 +227,48 @@
             $channelAssoc = strtolower($channel);
 
             // Destroy channel if the bot leaves it
-            if ( $address['nick'] == $this->getConfig('nick')){
+            if ($address['nick'] == $this->getConfig('nick')) {
                 unset($this->channels[$channelAssoc]);
             }
-            if ( is_object($this->channels[$channelAssoc])) {
+            if (is_object($this->channels[$channelAssoc])) {
                 // Suppress IDE inspection warning (Due to associative object creation)
                 /** @noinspection PhpUndefinedMethodInspection */
                 $this->channels[$channelAssoc]->delUser($address);
             }
+        }
+
+        /**
+         * Clear the channel user list.
+         *
+         * @param $channel
+         */
+        public function clearChannelUsers($channel)
+        {
+            $channelAssoc = strtolower($channel);
+
+            if (is_object($this->channels[$channelAssoc])) {
+                // Suppress IDE inspection warning (Due to associative object creation)
+                /** @noinspection PhpUndefinedMethodInspection */
+                $this->channels[$channelAssoc]->clearUsers();
+            }
+        }
+
+        /**
+         * Return the array of users of a channel
+         *
+         * @param $channel
+         *
+         * @return array
+         */
+        public function getChannelUsers($channel)
+        {
+            $channelAssoc = strtolower($channel);
+
+            if (is_object($this->channels[$channelAssoc])) {
+                // Suppress IDE inspection warning
+                /** @noinspection PhpUndefinedMethodInspection */
+                return $this->channels[$channelAssoc]->getUsers();
+            }
+            return array();
         }
     }

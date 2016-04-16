@@ -57,7 +57,12 @@
          */
         protected function ircPrivmsg($source, $text)
         {
-            $this->bot->sendData('PRIVMSG ' . $source . ' :' . $text);
+            $text = explode("\n", $text);
+            for ($i = 0; $i < count($text); $i++) {
+                if (isset($text[$i]) && strlen(trim($text[$i])) > 0) {
+                    $this->bot->sendData('PRIVMSG ' . $source . ' :' . $text[$i]);
+                }
+            }
         }
 
         /**
