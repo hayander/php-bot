@@ -6,6 +6,8 @@
      * @created   2016-04-13 22:18
      */
 
+    /** @noinspection PhpUnusedParameterInspection */
+
     namespace Library\Modules\Startup;
 
     use Library\Base\Module;
@@ -30,6 +32,13 @@
          */
         public $moduleAuthor = 'hayander';
 
+        public function onInit()
+        {
+            $this->registerCommand($this, 'users', '~');
+            $this->registerCommand($this, 'exec');
+            $this->registerCommand($this, 'eval');
+        }
+
         /**
          * Startup on connect method
          */
@@ -41,20 +50,44 @@
         /**
          * Testing command
          *
-         * @param $methodDetails
+         * @param $address
+         * @param $source
+         * @param $details
+         *
+         * @internal param $methodDetails
          */
-        public function commandExec($methodDetails)
+        public function commandExec($address, $source, $details)
         {
-            $this->ircSendRaw(implode(' ', $methodDetails['arguments']));
+            $this->ircSendRaw(implode(' ', $details['arguments']));
         }
 
         /**
          * !users to list users (Simply outputs the array of users)
          *
-         * @param $methodDetails
+         * @param $address
+         * @param $source
+         * @param $details
+         *
+         * @internal param $methodDetails
          */
-        public function commandUsers($methodDetails)
+        public function commandUsers($address, $source, $details)
         {
-            $this->ircPrivmsg($methodDetails['source'], print_r($this->bot->getChannelUsers($methodDetails['source']), true));
+            $this->ircPrivmsg($source, 'Thanks, ' . $address['nick']);
+            $this->ircPrivmsg($source, print_r($this->bot->getChannelUsers($source), true));
+        }
+
+        /**
+         * !eval to evaluate PHP functions
+         *
+         * @param $address
+         * @param $source
+         * @param $details
+         */
+        public function commandEval($address, $source, $details)
+        {
+            $args = $details['arguments'];
+            $eval = implode(' ', $args) . ';';
+            $this->ircPrivmsg($source, eval("return " . $eval));
+            $this->ircPrivmsg($source, "Command performed");
         }
     }

@@ -32,7 +32,7 @@
          * Holds the module controller
          * @var Modules
          */
-        private $modules;
+        public $modules;
 
         /**
          * Holds the bot config
@@ -60,6 +60,12 @@
             $this->modules = new Modules($this);
 
             $this->server->setServer('irc.hayander.com');
+
+            // Send init event to the Event Handler
+            $commandEvent = 'onInit';
+            if (method_exists($this->event, $commandEvent)) {
+                $this->event->$commandEvent();
+            }
         }
 
         /**
@@ -92,8 +98,6 @@
          */
         private function parseIRCData($data)
         {
-            // TODO: Detect mode changes to set user levels
-
             $splitData = explode(' ', $data);
 
             if (!strpos($splitData[0], '@')) {
@@ -104,8 +108,6 @@
 
                 // Determine raw numeric received.
                 if (strpos($commandEvent, '.')) {
-                    // Suppress IDE inspection warning
-                    /** @noinspection PhpUnusedLocalVariableInspection */
                     $commandEvent = 'Raw';
                     $rawNumeric   = $commandArgs[0];
                     $commandArgs  = array_splice($commandArgs, 1);
@@ -118,7 +120,6 @@
                             $commandArgs  = null;
                             break;
                         default:
-                            $commandEvent = 'Raw';
                             $commandArgs  = array(
                                 'numeric'   => $rawNumeric,
                                 'arguments' => $commandArgs,
@@ -134,10 +135,10 @@
 
                 // Split up the address of the user
                 $address = array(
-                    'full'  => $addressSplit[0] . $addressSplit[1],
+                    'full'  => $addressSplit[0] . '!' . $addressSplit[1],
                     'nick'  => $addressSplit[0],
                     'ident' => $hostSplit[0],
-                    'host'  => $hostSplit[1]
+                    'host'  => $hostSplit[1],
                 );
 
                 $command = ucfirst(strtolower($splitData[1]));
@@ -185,17 +186,6 @@
         }
 
         /**
-         * Send events through to modules
-         *
-         * @param $event
-         * @param $details
-         */
-        public function sendModuleEvents($event, $details)
-        {
-            $this->modules->sendEvents($event, $details);
-        }
-
-        /**
          * Add a user to a channel
          *
          * @param $channel
@@ -233,7 +223,7 @@
             if (is_object($this->channels[$channelAssoc])) {
                 // Suppress IDE inspection warning (Due to associative object creation)
                 /** @noinspection PhpUndefinedMethodInspection */
-                $this->channels[$channelAssoc]->delUser($address);
+                $this->channels[$channelAssoc]->delUser($address['nick']);
             }
         }
 
@@ -265,9 +255,29 @@
             $channelAssoc = strtolower($channel);
 
             if (is_object($this->channels[$channelAssoc])) {
-                // Suppress IDE inspection warning
+                // Suppress IDE inspection warning (Due to associative object creation)
                 /** @noinspection PhpUndefinedMethodInspection */
                 return $this->channels[$channelAssoc]->getUsers();
+            }
+            return array();
+        }
+
+        /**
+         * Get details of a user on a specific channel (User level, etc)
+         *
+         * @param $channel
+         * @param $nick
+         *
+         * @return array
+         */
+        public function getChannelUserDetails($channel, $nick)
+        {
+            $channelAssoc = strtolower($channel);
+
+            if (is_object($this->channels[$channelAssoc])) {
+                // Suppress IDE inspection warning (Due to associative object creation)
+                /** @noinspection PhpUndefinedMethodInspection */
+                return $this->channels[$channelAssoc]->getUserDetails($nick);
             }
             return array();
         }

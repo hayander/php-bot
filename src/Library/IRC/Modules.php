@@ -30,6 +30,12 @@
         private $loadedModules = array();
 
         /**
+         * Holds registered commands
+         * @var \Library\IRC\Command
+         */
+        private $commands;
+
+        /**
          * Construct module controller class
          *
          * @param Bot $bot
@@ -49,7 +55,7 @@
 
             foreach ($modules as $name => $settings) {
                 $modClass              = '\Library\Modules\\' . $name . '\\' . $name;
-                $this->loadedModules[] = new $modClass($this->bot);
+                $this->loadedModules[] = new $modClass($this->bot, $this);
             }
         }
 
@@ -68,5 +74,84 @@
                     $m->$event($details);
                 }
             }
+        }
+
+        /**
+         * Register a command with the bot
+         *
+         * @param        $object
+         * @param        $name
+         * @param string $level
+         * @param string $method
+         */
+        public function registerCommand($object, $name, $level = '', $method = '')
+        {
+            echo 'Registering command ' . $name . ' from module ' . $object->moduleName . PHP_EOL;
+
+            $name = strtolower($name);
+            if (!isset($this->commands[$name])) {
+                if (empty($method)) {
+                    $method = 'command' . ucfirst($name);
+                }
+                if (method_exists($object, $method)) {
+                    $this->commands[$name] = new Command($object, $method, $level);
+                } else {
+                    echo 'FAILED. Unable to register ' . $name . '. Method does not exist' . PHP_EOL;
+                }
+            }
+        }
+
+        /**
+         * Determine if command is registered with the bot
+         *
+         * @param $name
+         *
+         * @return bool
+         */
+        public function isCommandRegistered($name)
+        {
+            $name = strtolower($name);
+            if (isset($this->commands[$name])) {
+                return $this->commands[$name];
+            }
+            return false;
+        }
+
+        /**
+         * Run command pass through
+         *
+         * @param $name
+         * @param $details
+         */
+        public function runCommand($name, $details)
+        {
+            $details['command'] = $name;
+            // Suppress IDE inspection warning (Due to associative object creation)
+            /** @noinspection PhpUndefinedMethodInspection */
+            $this->commands[$name]->runCommand($details);
+
+        }
+
+        /**
+         * Return command details
+         *
+         * @param string $command
+         *
+         * @return array
+         */
+        public function getCommandInfo($command = '')
+        {
+            if (empty($command)) {
+                $commands = array();
+                foreach ($this->commands as $cmd) {
+                    $commands[] = (array) $cmd;
+                }
+                return $commands;
+            } else {
+                if (isset($this->commands[$command])) {
+                    return (array) $this->commands[$command];
+                }
+            }
+            return array();
         }
     }

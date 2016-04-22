@@ -9,6 +9,7 @@
     namespace Library\Base;
 
     use Library\IRC\Bot;
+    use Library\IRC\Modules;
 
     /**
      * Base class for modules. Holds commonly used methods
@@ -26,13 +27,22 @@
         protected $bot;
 
         /**
+         * Holds the details of modules
+         * @var \Library\IRC\Modules
+         */
+        protected $modules;
+
+        /**
          * Construct the base module class
          *
-         * @param Bot $bot
+         * @param Bot                  $bot
+         * @param \Library\IRC\Modules $modules
          */
-        public function __construct(Bot $bot)
+        public function __construct(Bot $bot, Modules $modules)
         {
-            $this->bot = $bot;
+            $this->bot     = $bot;
+            $this->modules = $modules;
+
         }
 
         /**
@@ -41,7 +51,7 @@
          * @param        $channel
          * @param string $key
          */
-        protected function ircJoin($channel, $key = '')
+        public function ircJoin($channel, $key = '')
         {
             if ($key != '') {
                 $channel .= ' ' . $key;
@@ -55,7 +65,7 @@
          * @param $source
          * @param $text
          */
-        protected function ircPrivmsg($source, $text)
+        public function ircPrivmsg($source, $text)
         {
             $text = explode("\n", $text);
             for ($i = 0; $i < count($text); $i++) {
@@ -66,13 +76,41 @@
         }
 
         /**
+         * Makes the bot send a notice to source using text
+         *
+         * @param $source
+         * @param $text
+         */
+        public function ircNotice($source, $text)
+        {
+            $text = explode("\n", $text);
+            for ($i = 0; $i < count($text); $i++) {
+                if (isset($text[$i]) && strlen(trim($text[$i])) > 0) {
+                    $this->bot->sendData('NOTICE ' . $source . ' :' . $text[$i]);
+                }
+            }
+        }
+
+        /**
          * Makes the bot send a raw message to the server
          *
          * @param $text
          */
-        protected function ircSendRaw($text)
+        public function ircSendRaw($text)
         {
             $this->bot->sendData($text);
+        }
+
+        /**
+         * Register command pass through
+         *
+         * @param        $name
+         * @param        $function
+         * @param string $level
+         */
+        public function registerCommand($name, $function, $level = '')
+        {
+            $this->modules->registerCommand($name, $function, $level);
         }
 
         // TODO: Need to add IRC commands (Such as Notice, Describe, Part, Kick, Ban, Mode, Quit)

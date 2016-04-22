@@ -31,15 +31,17 @@
             $this->bot = $bot;
         }
 
+        public function onInit()
+        {
+            $this->bot->modules->sendEvents(__FUNCTION__, array());
+        }
+
         /**
          * On Connect event
          */
         public function onConnect()
         {
-            $this->sendData('PROTOCTL NAMESX');
-            $this->sendData('PROTOCTL UHNAMES');
-
-            $this->bot->sendModuleEvents(__FUNCTION__, array());
+            $this->bot->modules->sendEvents(__FUNCTION__, array());
         }
 
         /**
@@ -57,7 +59,7 @@
 
             $this->sendData('PONG ' . $methodDetails['arguments']);
 
-            $this->bot->sendModuleEvents(__METHOD__, $methodDetails);
+            $this->bot->modules->sendEvents(__METHOD__, $methodDetails);
         }
 
         /**
@@ -76,7 +78,7 @@
 
             $this->bot->addChannelUser($methodDetails['channel'], $methodDetails['address']);
 
-            $this->bot->sendModuleEvents(__METHOD__, $methodDetails);
+            $this->bot->modules->sendEvents(__METHOD__, $methodDetails);
         }
 
         /**
@@ -97,7 +99,7 @@
 
             $this->bot->delChannelUser($methodDetails['channel'], $methodDetails['address']);
 
-            $this->bot->sendModuleEvents(__METHOD__, $methodDetails);
+            $this->bot->modules->sendEvents(__METHOD__, $methodDetails);
         }
 
         /**
@@ -113,20 +115,28 @@
                 'text'    => explode(' ', trim(substr(implode(' ', array_splice($details['arguments'], 1)), 1))),
             );
 
+            $methodDetails['address']['level'] = $this->bot->getChannelUserDetails($methodDetails['source'], $methodDetails['address']['nick'])['level'];
+
             if ($methodDetails['source'] == $this->bot->getConfig('nick')) {
                 $methodDetails['source'] = $methodDetails['address']['nick'];
             }
 
             if (strpos($methodDetails['text'][0], $this->bot->getConfig('commandPrefix')) == 0) {
                 // This is a command
-                $command = substr($methodDetails['text'][0], strlen($this->bot->getConfig('command_prefix')));
+                $commandName = substr($methodDetails['text'][0], strlen($this->bot->getConfig('command_prefix')));
 
                 $methodDetails['arguments'] = array_splice($methodDetails['text'], 1);
 
-                $this->bot->sendModuleEvents('command' . $command, $methodDetails);
+                $command = $this->bot->modules->isCommandRegistered($commandName);
+
+                if ($command) {
+                    print_r($methodDetails);
+                    $this->bot->modules->runCommand($commandName, $methodDetails);
+                }
+
             } else {
                 // Else, not a command. Just text.
-                $this->bot->sendModuleEvents(__METHOD__, $methodDetails);
+                $this->bot->modules->sendEvents(__METHOD__, $methodDetails);
             }
         }
 
@@ -149,7 +159,7 @@
                 $this->sendData('NAMES ' . $methodDetails['source']);
             }
 
-            $this->bot->sendModuleEvents(__METHOD__, $methodDetails);
+            $this->bot->modules->sendEvents(__METHOD__, $methodDetails);
         }
 
         /**
@@ -178,7 +188,7 @@
                         $nick  = str_replace(array('-', '+', '%', '&', '~'), '', $addressSplit[0]);
                         $level = str_replace($nick, '', $addressSplit[0]);
 
-                        // Create empty address
+                        // Create empty address (In case server doesn't support UHNAMES)
                         $address = array(
                             'full'  => '',
                             'nick'  => $nick,
@@ -190,7 +200,7 @@
                         // Populate the full address array if the server has sent it
                         if (isset($addressSplit[1])) {
                             $hostSplit        = explode('@', $addressSplit[1]);
-                            $address['full']  = $addressSplit[0] . $addressSplit[1];
+                            $address['full']  = $nick . '!' . $addressSplit[1];
                             $address['ident'] = $hostSplit[0];
                             $address['host']  = $hostSplit[1];
                         }
@@ -199,10 +209,20 @@
 
                     }
                     break;
+                // Numeric 005 = Lists supported options of server
+                case 005:
+
+                    $supports = array_splice($details['arguments'], 1);
+
+                    // If server supports UHNAMES, tell them we do too (User hosts in /names response)
+                    if (array_search('UHNAMES', $supports)) {
+                        $this->sendData('PROTOCTL UHNAMES');
+                    }
+                    break;
 
             }
 
-            $this->bot->sendModuleEvents(__METHOD__, $details);
+            $this->bot->modules->sendEvents(__METHOD__, $details);
         }
 
         /**

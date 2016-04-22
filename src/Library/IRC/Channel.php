@@ -57,11 +57,11 @@
         /**
          * Delete a user from the user list of the channel
          *
-         * @param $address
+         * @param $nick
          */
-        public function delUser($address)
+        public function delUser($nick)
         {
-            $nick = strtolower($address['nick']);
+            $nick = strtolower($nick);
             if (isset($this->users[$nick])) {
                 unset($this->users[$nick]);
             }
@@ -75,6 +75,20 @@
         public function getUsers()
         {
             return $this->users;
+        }
+
+        /**
+         * Get details of a single user
+         *
+         * @param $nick
+         *
+         * @return mixed
+         */
+        public function getUserDetails($nick)
+        {
+            $nick = strtolower($nick);
+
+            return $this->users[$nick];
         }
 
     }
